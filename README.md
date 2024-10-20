@@ -1,4 +1,5 @@
-# Youtube_Video_Downloader
+# Youtube_Video_Downloader With Flask
+
 This is a Youtube downloader script written in python which is capable of downloading all shorts and full video From youtube and if flagged then can extract and download audio from the videos .. its free of cost and is simple example created with flask which adds some magic in it ....
 
 --> this is a general way of downloading a YouTube video to downloads directory for free you can download shots and full video
@@ -24,3 +25,17 @@ This is a Youtube downloader script written in python which is capable of downlo
 --> url is required and other parameters are optional to 720 and False i.e. both audio and video 
 --> While executing the script if you want to make the selenium part in background use the feature 'headless=True' which causes the fucntion to run in background
 --> Also take care of the errors which might crept in the function which could hardly detectable errors .. Thankyou..
+
+# Youtube Video Downloader API
+This is a youtube downlaoder api which is capable of downlaoding video or audio from any youtube or youtube shots link with some hidder browser automations and webpage scapping.. the tools used it his are of new and less knows so it was fun creating this..
+
+USES : they are mention in main function also but just for sake of ease
+from Youtube_Downloader import Downloader
+yt = Downloader()
+yt.download(url, quality, onlyaudio?(boolean), automatic downlaod in download folder(boolean))
+
+don't paste this this explains how paramteres are to be given . thankyou
+
+# Pre requirements 
+--> Requests
+--> PlayWright
