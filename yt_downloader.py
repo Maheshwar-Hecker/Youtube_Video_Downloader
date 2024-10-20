@@ -8,32 +8,47 @@
 ####Caution if you require it in the 360p it is downloaded in the downloads folder in the same directory and on the webpage
 #there is a link to watch the video online .........
 
+
+#this was using flask to implement the details now i want to use it as a api which takes link quality etc
+#and returns the video download link or saves the video and gives the view link
+
 from playwright.sync_api import sync_playwright
 import requests #to directly download video from the link
 from flask import Flask, request, jsonify,render_template
 import time
 import re
+import os
 app = Flask(__name__)
 
 def sanitize_name(filename):#need of sanitizing is there because when saving the file the name is causing error
     # Remove any character that is not a letter, number, space, or common punctuation
     return re.sub(r'[<>:"/\\|?*]', '_', filename)
 
-def download_video_withLink(video_url, save_path,name):#direclty download the video with the link
-    # Send GET request to download the video
-    #naming the file
-    name = sanitize_name(name)
-    save_path = f"{save_path}/{name}.mp4"
-    response = requests.get(video_url, stream=True)
 
+def download_video_withLink(video_url, save_path_folder, name,red_quality):  # directly download the video with the link
+    # Send GET request to download the video
+    # naming the file
+    name = sanitize_name(name)
+    cwd = os.getcwd()
+    save_path = os.path.join(cwd, f"{save_path_folder}", f"{name}_{red_quality}.mp4")
+    # save_path = f"../{save_path}/{name}.mp4"
+    response = requests.get(video_url)  # this gives a html response which contains the video url
+    # Use regex to find the URL within the var url definition in html response
+    url_pattern = r'var url = "(https?://[^\"]+)"'
+
+    # Search for the URL in the response
+    match = re.search(url_pattern, response.text)
+
+    Videoresponse = requests.get(match.group(1), stream=True)
+    # print(match.group(1)) # match.group(1) it contains the extracted url
     # Check if the request was successful
-    if response.status_code == 200:
+    if Videoresponse.status_code == 200:
         with open(save_path, 'wb') as file:
-            for chunk in response.iter_content(chunk_size=1024):
+            for chunk in Videoresponse.iter_content(chunk_size=1024):
                 if chunk:
                     file.write(chunk)
         print(f"Video downloaded to {save_path}")
-        return "Video Downloaded"
+        return "Video Downloaded", match.group(1)
     return "Failed to download video"
 
 
@@ -77,7 +92,7 @@ def start_download(target_url,Render_quality,only_audio=False):
                 if quality.__eq__('360') and Render_quality==quality:#special 360p case
                     link = columns[2].query_selector(".btn.btn-sm.btn-success").get_attribute("href")
                     name_of_the_video = page.query_selector("#video_title").inner_text()
-                    result = download_video_withLink(link,"downloads",name_of_the_video)
+                    result,link = download_video_withLink(link,"downloads",name_of_the_video,quality)
                     if result=="Video Downloaded":
                         return{
                             'name_of_the_video': name_of_the_video,
@@ -115,7 +130,7 @@ def start_download(target_url,Render_quality,only_audio=False):
                     if quality.__eq__('360') :#rare case when only 360p is available for download
                         link = columns[2].query_selector(".btn.btn-sm.btn-success").get_attribute("href")
                         name_of_the_video = page.query_selector("#video_title").inner_text()
-                        result = download_video_withLink(link, "downloads", name_of_the_video)
+                        result,link = download_video_withLink(link, "downloads", name_of_the_video,quality)
                         if result == "Video Downloaded":
                             return {
                                 'name_of_the_video': name_of_the_video,
